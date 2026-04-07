@@ -8,17 +8,26 @@ export default function Dashboard() {
   const router = useRouter();
   const [status, setStatus] = useState(null);
   const [answers, setAnswers] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const userId = localStorage.getItem('sortdrop_user_id');
+    const uid = localStorage.getItem('sortdrop_user_id');
     const savedAnswers = localStorage.getItem('sortdrop_answers');
-    if (!userId) { router.push('/onboarding'); return; }
+    if (!uid) { router.push('/onboarding'); return; }
+    setUserId(uid);
     if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
 
-    fetch(`${BACKEND}/subscription/status?user_id=${userId}`)
+    fetch(`${BACKEND}/subscription/status?user_id=${uid}`)
       .then(r => r.json())
       .then(setStatus);
   }, []);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(userId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (!status) return (
     <main style={{ minHeight: '100vh', background: '#0D0B1E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -54,6 +63,30 @@ export default function Dashboard() {
       <div style={{ marginBottom: 40 }}>
         <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>Your setup is ready 🎉</h1>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16 }}>Here's your personalized folder structure based on your answers.</p>
+      </div>
+
+      {/* User ID Card */}
+      <div style={{
+        background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.3)',
+        borderRadius: 16, padding: '20px 24px', marginBottom: 32,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <div>
+          <div style={{ fontSize: 12, color: '#A855F7', fontWeight: 600, marginBottom: 4, letterSpacing: '0.08em' }}>YOUR USER ID</div>
+          <div style={{ fontFamily: 'monospace', fontSize: 15, color: 'rgba(255,255,255,0.9)' }}>{userId}</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>Paste this into the desktop app under "Enter User ID"</div>
+        </div>
+        <button
+          onClick={handleCopy}
+          style={{
+            background: copied ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.15)',
+            border: '1px solid rgba(168,85,247,0.4)',
+            borderRadius: 8, color: copied ? '#C084FC' : '#A855F7',
+            padding: '8px 16px', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
+          }}>
+          {copied ? '✓ Copied!' : 'Copy ID'}
+        </button>
       </div>
 
       {/* Folder preview */}
@@ -96,22 +129,16 @@ export default function Dashboard() {
           <div style={{ fontSize: 24, marginBottom: 12 }}>⚡</div>
           <div style={{ fontWeight: 600, marginBottom: 8 }}>Upgrade to Pro</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Unlimited sorts, config backup, priority support.</div>
-          <button style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
           <button
-  onClick={() => {
-    const userId = localStorage.getItem('sortdrop_user_id');
-    window.open(`https://buy.stripe.com/test_3cI28sgyudkXaSHbqI0sU00?client_reference_id=${userId}`, '_blank');
-  }}
-  style={{
-    marginTop: 24, width: '100%',
-    background: 'rgba(255,255,255,0.08)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 8, color: 'white',
-    padding: '10px 16px', fontSize: 13,
-    fontWeight: 600, cursor: 'pointer',
-  }}>
-  {isPro ? '✓ Already Pro' : 'Upgrade — $8/mo'}
-</button>
+            onClick={() => {
+              window.open(`https://buy.stripe.com/test_3cI28sgyudkXaSHbqI0sU00?client_reference_id=${userId}`, '_blank');
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13,
+              fontWeight: 600, cursor: 'pointer',
+            }}>
+            {isPro ? '✓ Already Pro' : 'Upgrade — $8/mo'}
           </button>
         </div>
       </div>

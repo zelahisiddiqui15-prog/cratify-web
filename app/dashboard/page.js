@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const BACKEND = 'https://web-production-a92d.up.railway.app';
-const https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.zip = 'https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.zip';
+const DOWNLOAD_URL = 'https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.dmg';
 
 const LogoMark = ({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none">

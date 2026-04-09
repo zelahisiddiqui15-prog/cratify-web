@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const BACKEND = 'https://web-production-a92d.up.railway.app';
-const DOWNLOAD_URL = 'https://github.com/zelahisiddiqui15-prog/cratify-backend/releases/download/v1.0.0/Cratify.zip';
+const https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.zip = 'https://github.com/zelahisiddiqui15-prog/cratify-backend/releases/download/v1.0.0/Cratify.zip';
 
 const LogoMark = ({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -165,7 +165,7 @@ export default function Dashboard() {
           <div style={{ fontWeight: 600, marginBottom: 8 }}>Download the app</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Mac menu bar app that watches your folders automatically.</div>
           <button
-            onClick={() => window.open(DOWNLOAD_URL, '_blank')}
+            onClick={() => window.open(https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.zip, '_blank')}
             style={{ background: 'linear-gradient(135deg, #A855F7, #7C3AED)', border: 'none', borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             Download for Mac
           </button>

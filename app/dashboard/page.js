@@ -5,29 +5,52 @@ import { useRouter } from 'next/navigation';
 const BACKEND = 'https://web-production-a92d.up.railway.app';
 const DOWNLOAD_URL = 'https://github.com/zelahisiddiqui15-prog/cratify-backend/releases/download/v1.0.0/Cratify.zip';
 
+const LogoMark = ({ size = 32 }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+    <rect width="32" height="32" rx="8" fill="#A855F7"/>
+    <rect x="7" y="8" width="18" height="5" rx="2.5" fill="white"/>
+    <rect x="7" y="14.5" width="12" height="5" rx="2.5" fill="white" opacity="0.55"/>
+    <rect x="7" y="21" width="18" height="5" rx="2.5" fill="white"/>
+  </svg>
+);
+
 export default function Dashboard() {
   const router = useRouter();
   const [status, setStatus] = useState(null);
   const [answers, setAnswers] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [username, setUsername] = useState('');
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const uid = localStorage.getItem('sortdrop_user_id');
     const savedAnswers = localStorage.getItem('sortdrop_answers');
-    if (!uid) { router.push('/onboarding'); return; }
+    const savedUsername = localStorage.getItem('cratify_username');
+    if (!uid) { router.push('/login'); return; }
     setUserId(uid);
     if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
+    if (savedUsername) setUsername(savedUsername);
 
     fetch(`${BACKEND}/subscription/status?user_id=${uid}`)
       .then(r => r.json())
-      .then(setStatus);
+      .then(data => {
+        setStatus(data);
+        if (data.username) setUsername(data.username);
+      });
   }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(userId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('sortdrop_user_id');
+    localStorage.removeItem('cratify_username');
+    localStorage.removeItem('cratify_email');
+    localStorage.removeItem('sortdrop_answers');
+    router.push('/login');
   };
 
   if (!status) return (
@@ -47,23 +70,40 @@ export default function Dashboard() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #A855F7, #7C3AED)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>✦</div>
+          <LogoMark size={32} />
           <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: '0.05em' }}>CRATIFY</span>
         </div>
-        <div style={{
-          background: isPro ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)',
-          border: `1px solid ${isPro ? '#A855F7' : 'rgba(255,255,255,0.1)'}`,
-          borderRadius: 20, padding: '6px 14px', fontSize: 13,
-          color: isPro ? '#A855F7' : 'rgba(255,255,255,0.5)',
-        }}>
-          {isPro ? '✓ Pro — Unlimited' : `${sortsLeft} sorts remaining`}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {username && (
+            <span style={{ fontSize: 14, color: '#A855F7', fontWeight: 600 }}>@{username}</span>
+          )}
+          <div style={{
+            background: isPro ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${isPro ? '#A855F7' : 'rgba(255,255,255,0.1)'}`,
+            borderRadius: 20, padding: '6px 14px', fontSize: 13,
+            color: isPro ? '#A855F7' : 'rgba(255,255,255,0.5)',
+          }}>
+            {isPro ? '✓ Pro — Unlimited' : `${sortsLeft} sorts remaining`}
+          </div>
+          <button onClick={handleLogout} style={{
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 8, color: 'rgba(255,255,255,0.4)',
+            padding: '6px 14px', fontSize: 13, cursor: 'pointer',
+          }}>
+            Sign out
+          </button>
         </div>
       </div>
 
       {/* Welcome */}
       <div style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>Your setup is ready 🎉</h1>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16 }}>Here's your personalized folder structure based on your answers.</p>
+        <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>
+          {username ? `Hey @${username} 👋` : 'Your setup is ready 🎉'}
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16 }}>
+          Here's your personalized folder structure based on your answers.
+        </p>
       </div>
 
       {/* User ID Card */}
@@ -77,15 +117,13 @@ export default function Dashboard() {
           <div style={{ fontFamily: 'monospace', fontSize: 15, color: 'rgba(255,255,255,0.9)' }}>{userId}</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>Paste this into the Cratify app under "Enter User ID"</div>
         </div>
-        <button
-          onClick={handleCopy}
-          style={{
-            background: copied ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.15)',
-            border: '1px solid rgba(168,85,247,0.4)',
-            borderRadius: 8, color: copied ? '#C084FC' : '#A855F7',
-            padding: '8px 16px', fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
-          }}>
+        <button onClick={handleCopy} style={{
+          background: copied ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.15)',
+          border: '1px solid rgba(168,85,247,0.4)',
+          borderRadius: 8, color: copied ? '#C084FC' : '#A855F7',
+          padding: '8px 16px', fontSize: 13, fontWeight: 600,
+          cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
+        }}>
           {copied ? '✓ Copied!' : 'Copy ID'}
         </button>
       </div>
@@ -133,9 +171,7 @@ export default function Dashboard() {
           <div style={{ fontWeight: 600, marginBottom: 8 }}>Upgrade to Pro</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Unlimited sorts, config backup, priority support.</div>
           <button
-            onClick={() => {
-              window.open(`https://buy.stripe.com/test_3cI28sgyudkXaSHbqI0sU00?client_reference_id=${userId}`, '_blank');
-            }}
+            onClick={() => window.open(`https://buy.stripe.com/test_3cI28sgyudkXaSHbqI0sU00?client_reference_id=${userId}`, '_blank')}
             style={{
               background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13,

@@ -32,9 +32,21 @@ export default function Home() {
           <LogoMark size={32} />
           <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: '0.05em' }}>CRATIFY</span>
         </div>
-        <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
           <a href="#how" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: 14 }}>How it works</a>
           <a href="#pricing" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: 14 }}>Pricing</a>
+          <button
+            onClick={() => router.push('/login')}
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(168,85,247,0.4)',
+              borderRadius: 8,
+              color: 'rgba(255,255,255,0.7)',
+              padding: '9px 18px',
+              fontSize: 14, fontWeight: 500, cursor: 'pointer',
+            }}>
+            Sign in
+          </button>
           <button
             onClick={() => router.push('/onboarding')}
             style={{

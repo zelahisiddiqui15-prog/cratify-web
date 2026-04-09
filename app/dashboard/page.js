@@ -1,8 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 
 const BACKEND = 'https://web-production-a92d.up.railway.app';
+const stripePromise = loadStripe('pk_test_51TJhAELjX5nxwd7Nm1XRNLoLMwhzFLwjzQsdLTQbq1nPz4mYQ0iveHln6m8Y6DvER19v7otBpPhd8uXjNRA7O50q000gvYJD4G');
 const DOWNLOAD_URL = 'https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.dmg';
 
 const LogoMark = ({ size = 32 }) => (
@@ -19,6 +22,8 @@ export default function Dashboard() {
   const [status, setStatus] = useState(null);
   const [answers, setAnswers] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [clientSecret, setClientSecret] = useState(null);
   const [username, setUsername] = useState('');
 
   useEffect(() => {
@@ -116,10 +121,18 @@ export default function Dashboard() {
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
             {isPro ? 'Full access — all features unlocked' : 'Upgrade to Pro for unlimited sorts'}
           </div>
-        </div>
-        {!isPro && (
+          {!isPro && (
           <button
-            onClick={() => window.open(`https://buy.stripe.com/test_3cI28sgyudkXaSHbqI0sU00?client_reference_id=${userId}`, '_blank')}
+            onClick={async () => {
+              const res = await fetch(`${BACKEND}/stripe/create-checkout-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId }),
+              });
+              const data = await res.json();
+              setClientSecret(data.clientSecret);
+              setShowCheckout(true);
+            }}
             style={{
               background: 'linear-gradient(135deg, #A855F7, #7C3AED)',
               border: 'none', borderRadius: 10,
@@ -127,6 +140,19 @@ export default function Dashboard() {
               fontSize: 14, fontWeight: 600, cursor: 'pointer',
               whiteSpace: 'nowrap',
             }}>
+            Upgrade — $8/mo
+          </button>
+        )}
+        {showCheckout && clientSecret && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: 'white', borderRadius: 16, padding: 24, width: '90%', maxWidth: 500, position: 'relative' }}>
+              <button onClick={() => setShowCheckout(false)} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            </div>
+          </div>
+        )}
             Upgrade — $8/mo
           </button>
         )}

@@ -175,7 +175,7 @@ export default function Dashboard() {
           <div style={{ fontWeight: 600, marginBottom: 8 }}>How it works</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Open the app, sign in with your email and password, and Cratify starts watching automatically.</div>
           <button
-            onClick={() => router.push('/#how')}
+            onClick={() => alert('1. Download the app\n2. Sign in with your email and password\n3. Cratify watches your Splice folder and sorts files automatically')}
             style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             Learn more
           </button>

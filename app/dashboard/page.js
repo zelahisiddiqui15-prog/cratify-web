@@ -153,9 +153,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-            Upgrade — $8/mo
-          </button>
-        )}
       </div>
 
       {/* Folder preview */}

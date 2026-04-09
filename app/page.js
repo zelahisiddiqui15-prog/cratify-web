@@ -1,6 +1,15 @@
 'use client';
 import { useRouter } from 'next/navigation';
 
+const LogoMark = ({ size = 32 }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+    <rect width="32" height="32" rx="8" fill="#A855F7"/>
+    <rect x="7" y="8" width="18" height="5" rx="2.5" fill="white"/>
+    <rect x="7" y="14.5" width="12" height="5" rx="2.5" fill="white" opacity="0.55"/>
+    <rect x="7" y="21" width="18" height="5" rx="2.5" fill="white"/>
+  </svg>
+);
+
 export default function Home() {
   const router = useRouter();
 
@@ -20,13 +29,7 @@ export default function Home() {
         borderBottom: '1px solid rgba(168, 85, 247, 0.15)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: 32, height: 32,
-            background: 'linear-gradient(135deg, #A855F7, #7C3AED)',
-            borderRadius: 8,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16,
-          }}>✦</div>
+          <LogoMark size={32} />
           <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: '0.05em' }}>CRATIFY</span>
         </div>
         <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
@@ -60,11 +63,10 @@ export default function Home() {
         <h1 style={{
           fontSize: 64, fontWeight: 800,
           lineHeight: 1.1, marginBottom: 24,
-          background: 'linear-gradient(135deg, #ffffff 0%, #A855F7 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
+          color: '#FFFFFF',
         }}>
-          Your samples.<br />Finally organized.
+          Your samples.<br />
+          <span style={{ color: '#A855F7' }}>Finally organized.</span>
         </h1>
         <p style={{
           fontSize: 20, color: 'rgba(255,255,255,0.6)',

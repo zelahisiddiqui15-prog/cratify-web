@@ -98,7 +98,7 @@ export default function Dashboard() {
       </div>
 
       <div style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>{username ? `Hey @${userme}` : 'Welcome to Cratify'}</h1>
+        <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>{username ? `Hey @${username}` : 'Welcome to Cratify'}</h1>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16 }}>Your account is active. Download the app and start organizing your samples.</p>
       </div>
 

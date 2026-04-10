@@ -1,12 +1,11 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 
 const BACKEND = 'https://web-production-a92d.up.railway.app';
 const stripePromise = loadStripe('pk_test_51TJhAELjX5nxwd7Nm1XRNLoLMwhzFLwjzQsdLTQbq1nPz4mYQ0iveHln6m8Y6DvER19v7otBpPhd8uXjNRA7O50q000gvYJD4G');
-const DOWNLOAD_URL = 'https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.dmg';
 
 const LogoMark = ({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -34,7 +33,6 @@ export default function Dashboard() {
     setUserId(uid);
     if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
     if (savedUsername) setUsername(savedUsername);
-
     fetch(`${BACKEND}/subscription/status?user_id=${uid}`)
       .then(r => r.json())
       .then(data => {
@@ -51,6 +49,17 @@ export default function Dashboard() {
     router.push('/login');
   };
 
+  const handleUpgrade = async () => {
+    const res = await fetch(`${BACKEND}/stripe/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    const data = await res.json();
+    setClientSecret(data.clientSecret);
+    setShowCheckout(true);
+  };
+
   if (!status) return (
     <main style={{ minHeight: '100vh', background: '#0D0B1E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'sans-serif' }}>Loading...</div>
@@ -61,149 +70,88 @@ export default function Dashboard() {
   const isPro = status.subscription_active;
 
   return (
-    <main style={{
-      minHeight: '100vh', background: '#0D0B1E', color: 'white',
-      fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '40px 48px',
-    }}>
-      {/* Header */}
+    <main style={{ minHeight: '100vh', background: '#0D0B1E', color: 'white', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', padding: '40px 48px' }}>
+
+      {showCheckout && clientSecret && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 24, width: '90%', maxWidth: 500, position: 'relative' }}>
+            <button onClick={() => setShowCheckout(false)} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>x</button>
+            <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+              <EmbeddedCheckout />
+            </EmbeddedCheckoutProvider>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <LogoMark size={32} />
           <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: '0.05em' }}>CRATIFY</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {username && (
-            <span style={{ fontSize: 14, color: '#A855F7', fontWeight: 600 }}>@{username}</span>
-          )}
-          <div style={{
-            background: isPro ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)',
-            border: `1px solid ${isPro ? '#A855F7' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: 20, padding: '6px 14px', fontSize: 13,
-            color: isPro ? '#A855F7' : 'rgba(255,255,255,0.5)',
-          }}>
-            {isPro ? '✓ Pro — Unlimited' : `${sortsLeft} sorts remaining`}
+          {username && <span style={{ fontSize: 14, color: '#A855F7', fontWeight: 600 }}>@{username}</span>}
+          <div style={{ background: isPro ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.05)', border: `1px solid ${isPro ? '#A855F7' : 'rgba(255,255,255,0.1)'}`, borderRadius: 20, padding: '6px 14px', fontSize: 13, color: isPro ? '#A855F7' : 'rgba(255,255,255,0.5)' }}>
+            {isPro ? 'Pro — Unlimited' : `${sortsLeft} sorts remaining`}
           </div>
-          <button onClick={handleLogout} style={{
-            background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 8, color: 'rgba(255,255,255,0.4)',
-            padding: '6px 14px', fontSize: 13, cursor: 'pointer',
-          }}>
-            Sign out
-          </button>
+          <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'rgba(255,255,255,0.4)', padding: '6px 14px', fontSize: 13, cursor: 'pointer' }}>Sign out</button>
         </div>
       </div>
 
-      {/* Welcome */}
       <div style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>
-          {username ? `Hey @${username} 👋` : 'Welcome to Cratify 🎉'}
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16 }}>
-          Your account is active. Download the app and start organizing your samples.
-        </p>
+        <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>{username ? `Hey @${userme}` : 'Welcome to Cratify'}</h1>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16 }}>Your account is active. Download the app and start organizing your samples.</p>
       </div>
 
-      {/* Plan card */}
-      <div style={{
-        background: isPro ? 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(124,58,237,0.15))' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${isPro ? 'rgba(168,85,247,0.5)' : 'rgba(255,255,255,0.08)'}`,
-        borderRadius: 16, padding: '24px 28px', marginBottom: 32,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div style={{ background: isPro ? 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(124,58,237,0.15))' : 'rgba(255,255,255,0.03)', border: `1px solid ${isPro ? 'rgba(168,85,247,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 16, padding: '24px 28px', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 12, color: isPro ? '#A855F7' : 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.08em' }}>
-            {isPro ? 'PRO PLAN' : 'FREE PLAN'}
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>
-            {isPro ? 'Unlimited sorts' : `${sortsLeft} sorts remaining`}
-          </div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-            {isPro ? 'Full access — all features unlocked' : 'Upgrade to Pro for unlimited sorts'}
-          </div>
-          {!isPro && (
-          <button
-            onClick={async () => {
-              const res = await fetch(`${BACKEND}/stripe/create-checkout-session`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId }),
-              });
-              const data = await res.json();
-              setClientSecret(data.clientSecret);
-              setShowCheckout(true);
-            }}
-            style={{
-              background: 'linear-gradient(135deg, #A855F7, #7C3AED)',
-              border: 'none', borderRadius: 10,
-              color: 'white', padding: '12px 24px',
-              fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}>
+          <div style={{ fontSize: 12, color: isPro ? '#A855F7' : 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.08em' }}>{isPro ? 'PRO PLAN' : 'FREE PLAN'}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{isPro ? 'Unlimited sorts' : `${sortsLeft} sorts remaining`}</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{isPro ? 'Full access — all features unlocked' : 'grade to Pro for unlimited sorts'}</div>
+        </div>
+        {!isPro && (
+          <button onClick={handleUpgrade} style={{ background: 'linear-gradient(135deg, #A855F7, #7C3AED)', border: 'none', borderRadius: 10, color: 'white', padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
             Upgrade — $8/mo
           </button>
         )}
-        {showCheckout && clientSecret && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: 'white', borderRadius: 16, padding: 24, width: '90%', maxWidth: 500, position: 'relative' }}>
-              <button onClick={() => setShowCheckout(false)} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>×</button>
-              <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
-                <EmbeddedCheckout />
-              </EmbeddedCheckoutProvider>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Folder preview */}
       {answers && (
-        <div style={{
-          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(168,85,247,0.2)',
-          borderRadius: 16, padding: 32, marginBottom: 32, fontFamily: 'monospace',
-        }}>
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: 16, padding: 32, marginBottom: 32, fontFamily: 'monospace' }}>
           <div style={{ color: '#A855F7', fontSize: 13, marginBottom: 16, fontFamily: 'sans-serif', fontWeight: 600 }}>YOUR FOLDER STRUCTURE</div>
           <div style={{ fontSize: 14, lineHeight: 2, color: 'rgba(255,255,255,0.8)' }}>
-            <div>📁 Cratify/</div>
-            {answers.file_types?.includes('Stems & Loops') && <>
-              <div>&nbsp;&nbsp;📁 Bass/</div>
-              <div>&nbsp;&nbsp;&nbsp;&nbsp;📁 Am/ &nbsp;&nbsp;<span style={{ color: 'rgba(255,255,255,0.3)' }}>← stems sorted by key</span></div>
-              <div>&nbsp;&nbsp;📁 Lead/</div>
-              <div>&nbsp;&nbsp;📁 Pad/</div>
-              <div>&nbsp;&nbsp;📁 FX/</div>
-            </>}
-            {answers.file_types?.includes('MIDI files') && <div>&nbsp;&nbsp;📁 MIDI/</div>}
-            {answers.file_types?.includes('Presets') && <>
-              <div>&nbsp;&nbsp;📁 Presets/</div>
-              {answers.plugins?.map(p => <div key={p}>&nbsp;&nbsp;&nbsp;&nbsp;📁 {p}/</div>)}
-            </>}
-            {answers.file_types?.includes('One-shots') && <div>&nbsp;&nbsp;📁 One-shots/</div>}
+            <div>Cratify/</div>
+            {answers.file_types?.includes('Stems & Loops') && (
+              <>
+                <div>&nbsp;&nbsp;Bass/</div>
+                <div>&np;&nbsp;Lead/</div>
+                <div>&nbsp;&nbsp;Pad/</div>
+                <div>&nbsp;&nbsp;FX/</div>
+              </>
+            )}
+            {answers.file_types?.includes('MIDI files') && <div>&nbsp;&nbsp;MIDI/</div>}
+            {answers.file_types?.includes('Presets') && <div>&nbsp;&nbsp;Presets/</div>}
+            {answers.file_types?.includes('One-shots') && <div>&nbsp;&nbsp;One-shots/</div>}
           </div>
         </div>
       )}
 
-      {/* Next steps */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24 }}>
-          <div style={{ fontSize: 24, marginBottom: 12 }}>⬇️</div>
-          <div style={{ fontWeight: 600, marginBottom: 8 }}>Download the app</div>
+          <div style={{ fontSize: 24, marginBottom: 12 }}>Download the app</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Mac menu bar app that watches your folders automatically.</div>
-          <button
-            onClick={() => window.open('https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.zip', '_blank')}
-            style={{ background: 'linear-gradient(135deg, #A855F7, #7C3AED)', border: 'none', borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          <button onClick={() => window.open('https://github.com/zelahisiddiqui15-prog/cratify-app/releases/download/v0.1.0/Cratify.zip', '_blank')} style={{ background: 'linear-gradient(135deg, #A855F7, #7C3AED)', border: 'none', borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             Download for Mac
           </button>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24 }}>
-          <div style={{ fontSize: 24, marginBottom: 12 }}>📖</div>
-          <div style={{ fontWeight: 600, marginBottom: 8 }}>How it works</div>
+          <div style={{ fontSize: 24, marginBottom: 12 }}>How it works</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>Open the app, sign in with your email and password, and Cratify starts watching automatically.</div>
-          <button
-            onClick={() => alert('1. Download the app\n2. Sign in with your email and password\n3. Cratify watches your Splice folder and sorts files automatically')}
-            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          <button onClick={() => alert('1. Download the app\n2. Sign in with your email and password\n3. Cratify watches your Splice folder and sorts files automatically')} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'white', padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             Learn more
           </button>
         </div>
       </div>
+
     </main>
   );
 }

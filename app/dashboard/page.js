@@ -74,7 +74,7 @@ export default function Dashboard() {
 
       {showCheckout && clientSecret && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', borderRadius: 16, padding: 24, width: '90%', maxWidth: 500, position: 'relative' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 24, width: "90%", maxWidth: 500, position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
             <button onClick={() => setShowCheckout(false)} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>x</button>
             <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
               <EmbeddedCheckout />
